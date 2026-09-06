@@ -12,6 +12,5 @@ func main() {
 		os.Exit(1)
 	}
 	commonBooks := findCommonBooks(bookworms)
-	fmt.Println("Here are the books in common:")
 	displayBooks(commonBooks)
 }
