@@ -12,5 +12,5 @@ const (
 	LevelInfo
 	// LevelError represents the highest logging level, only to be used
 	// to trace errors.
-	LevelErr
+	LevelError
 )
