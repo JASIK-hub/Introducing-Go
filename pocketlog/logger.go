@@ -15,9 +15,6 @@ type Option func(*Logger)
 
 // Debug formats and prints a message if the log level is debug or higher
 func (l *Logger) Debugf(format string, args ...any) {
-	if l.output == nil {
-		l.output = os.Stdout
-	}
 	logf(format, l, LevelDebug, args...)
 }
 
@@ -33,7 +30,7 @@ func logf(format string, l *Logger, lvl Level, args ...any) {
 	if l.threshold > lvl {
 		return
 	}
-	_, _ = fmt.Fprintf(l.output, format, args...)
+	_, _ = fmt.Fprintf(l.output, format+"\n", args...)
 }
 
 func WithOutput(output io.Writer) Option {
