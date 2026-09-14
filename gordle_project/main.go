@@ -6,6 +6,6 @@ import (
 )
 
 func main() {
-	g := gordle.New(os.Stdin)
+	g := gordle.New(os.Stdin, "apple", 3)
 	g.Play()
 }

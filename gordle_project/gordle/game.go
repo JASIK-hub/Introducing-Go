@@ -5,19 +5,24 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 )
 
 type Game struct {
-	reader *bufio.Reader
+	reader      *bufio.Reader
+	solution    []rune
+	maxAttempts int
 }
 
 const solutionLength = 5
 
 var errInvalidWordLength = fmt.Errorf("invalid guess, word doesn't have the same number of characters as the solution")
 
-func New(playerInput io.Reader) *Game {
+func New(playerInput io.Reader, solution string, maxAttempts int) *Game {
 	g := &Game{
-		reader: bufio.NewReader(playerInput),
+		reader:      bufio.NewReader(playerInput),
+		solution:    []rune(solution),
+		maxAttempts: maxAttempts,
 	}
 	return g
 }
@@ -54,4 +59,8 @@ func (g *Game) ask() []rune {
 		}
 	}
 
+}
+
+func splitToUppercaseCharacters(input string) []rune {
+	return []rune(strings.ToUpper(input))
 }
