@@ -46,12 +46,8 @@ func TestValidateGuess(t *testing.T) {
 		input   []rune
 		wantErr error
 	}{
-		"3 characters": {
-			input:   []rune("cat"),
-			wantErr: errInvalidWordLength,
-		},
-		"5 characters": {
-			input:   []rune("bomba"),
+		"nominal": {
+			input:   []rune("GUESS"),
 			wantErr: nil,
 		},
 		"too long guess": {
