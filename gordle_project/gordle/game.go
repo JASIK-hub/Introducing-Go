@@ -9,6 +9,8 @@ import (
 	"strings"
 )
 
+const MaxAttempts = 6
+
 type Game struct {
 	reader      *bufio.Reader
 	solution    []rune
@@ -20,7 +22,7 @@ var errInvalidWordLength = fmt.Errorf("invalid guess, word doesn't have the same
 func New(playerInput io.Reader, solution string, maxAttempts int) *Game {
 	g := &Game{
 		reader:      bufio.NewReader(playerInput),
-		solution:    []rune(solution),
+		solution:    splitToUppercaseCharacters(solution),
 		maxAttempts: maxAttempts,
 	}
 	return g
@@ -44,13 +46,12 @@ func (g *Game) validateGuess(guess []rune) error {
 			len(g.solution), len(guess), errInvalidWordLength)
 	}
 	return nil
-
 }
 
 func (g *Game) ask() []rune {
 	fmt.Printf("Enter a %d-character guess:\n", len(g.solution))
 	for {
-		playerInput, _, err := g.reader.ReadLine()
+		playerInput, err := g.reader.ReadString('\n')
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Gordle failed to read your guess: %s\n", err.Error())
 			continue
