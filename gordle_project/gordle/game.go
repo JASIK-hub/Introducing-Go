@@ -32,6 +32,8 @@ func (g *Game) Play() {
 	fmt.Println("Welcome to Gordle!")
 	for currentAttempt := 1; currentAttempt <= g.maxAttempts; currentAttempt++ {
 		guess := g.ask()
+		fb := computeFeedback(guess, g.solution)
+		fmt.Println(fb.String())
 		if slices.Equal(guess, g.solution) {
 			fmt.Printf("You won! You found it in %d guess(es)! The word was: %s.\n", currentAttempt, string(g.solution))
 			return
@@ -56,7 +58,9 @@ func (g *Game) ask() []rune {
 			fmt.Fprintf(os.Stderr, "Gordle failed to read your guess: %s\n", err.Error())
 			continue
 		}
-		guess := []rune(string(playerInput))
+		cleaned := splitToUppercaseCharacters(strings.TrimSpace(playerInput))
+		guess := []rune(string(cleaned))
+
 		err = g.validateGuess(guess)
 		if err != nil {
 			_, _ = fmt.Fprintf(os.Stderr, "Your attempt is invalid with Gordle's solution: %s.\n", err.Error())
