@@ -20,8 +20,11 @@ var (
 const maxDecimal = 1e12
 
 func ParseDecimal(value string) (Decimal, error) {
-	intPart, fracPart, _ := strings.Cut(value, ".")
+	intPart, fracPart, hasDot := strings.Cut(value, ".")
 
+	if hasDot && fracPart == "" {
+		return Decimal{}, ErrInvalidDecimal
+	}
 	subunits, err := strconv.ParseInt(intPart+fracPart, 10, 64)
 
 	if err != nil {
