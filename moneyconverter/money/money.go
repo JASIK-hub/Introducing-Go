@@ -40,3 +40,18 @@ func multiply(d Decimal, r ExchangeRate) Decimal {
 	dec.simplify()
 	return dec
 }
+
+func applyExchangeRate(a Amount, target Currency, r ExchangeRate) Amount {
+	converted := multiply(a.quantity, r)
+	if converted.precision > target.precision {
+		converted.subunits /= pow10(converted.precision - target.precision)
+	} else if converted.precision < target.precision {
+		converted.subunits *= pow10(target.precision - converted.precision)
+	}
+	converted.precision = target.precision
+	return Amount{
+		currency: target,
+		quantity: converted,
+	}
+
+}
