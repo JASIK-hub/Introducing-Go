@@ -16,7 +16,7 @@ func TestNewAmount(t *testing.T) {
 			quantity: Decimal{subunits: 192345, precision: 4},
 			currency: Currency{code: "USD", precision: 2},
 			expected: Amount{},
-			err:      ErrTooPresice,
+			err:      ErrTooPrecise,
 		}, "precision equals currency precision": {
 			quantity: Decimal{subunits: 1234, precision: 2},
 			currency: Currency{code: "USD", precision: 2},
