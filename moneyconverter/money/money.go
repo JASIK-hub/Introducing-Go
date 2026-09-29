@@ -56,5 +56,4 @@ func applyExchangeRate(a Amount, target Currency, r ExchangeRate) Amount {
 		currency: target,
 		quantity: converted,
 	}
-
 }
