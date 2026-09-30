@@ -6,15 +6,6 @@ import (
 
 type ExchangeRate Decimal
 
-type envelope struct {
-	Rates []currencyRate `xml:"Cube>Cube>Cube"`
-}
-
-type currencyRate struct {
-	Currency string       `xml:"currency,attr"`
-	Rate     ExchangeRate `xml:"rate,attr"`
-}
-
 func Convert(amount Amount, to Currency) (Amount, error) {
 	convertedValue := applyExchangeRate(amount, to, ExchangeRate{subunits: 2, precision: 0})
 	if err := convertedValue.validate(); err != nil {

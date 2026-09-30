@@ -7,17 +7,17 @@ import (
 	"strings"
 )
 
-type Decimal struct {
-	subunits  int64
-	precision byte
-}
-
 var (
 	ErrInvalidDecimal = errors.New("unable to convert the decimal")
 	ErrTooLarge       = errors.New("quantity over 10^12 is too large")
 )
 
 const maxDecimal = 1e12
+
+type Decimal struct {
+	subunits  int64
+	precision byte
+}
 
 func ParseDecimal(value string) (Decimal, error) {
 	intPart, fracPart, hasDot := strings.Cut(value, ".")
