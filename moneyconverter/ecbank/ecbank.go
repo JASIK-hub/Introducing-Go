@@ -1,8 +1,10 @@
 package ecbank
 
 import (
+	"encoding/xml"
 	"errors"
 	"fmt"
+	"io"
 	"moneyconverter/money"
 	"net/http"
 )
@@ -15,9 +17,11 @@ const (
 )
 
 var (
-	ErrServerSide        = errors.New("error calling server")
-	ErrClientSide        = errors.New("HTTP client error")
-	ErrUnknownStatusCode = errors.New("unexpected HTTP status code")
+	ErrServerSide         = errors.New("error calling server")
+	ErrClientSide         = errors.New("HTTP client error")
+	ErrUnknownStatusCode  = errors.New("unexpected HTTP status code")
+	ErrUnexpectedFormat   = errors.New("not valid format for response")
+	ErrChangeRateNotFound = errors.New("couldn't find the exchange rate")
 )
 
 type Client struct{}
@@ -53,17 +57,31 @@ func (e envelope) exchangeRate(source, target string) (money.ExchangeRate, error
 
 	sourceValue, sourceFound := rates[source]
 	if !sourceFound {
-		return money.ExchangeRate{}, fmt.Errorf("failed to find the source currency %s", sourceValue)
+		return money.ExchangeRate{}, fmt.Errorf("failed to find the source currency %s", source)
 	}
 	targetValue, targetFound := rates[target]
 	if !targetFound {
-		return money.ExchangeRate{}, fmt.Errorf("failed to find the source currency %s", targetValue)
+		return money.ExchangeRate{}, fmt.Errorf("failed to find the source currency %s", target)
 	}
 	rate, err := money.ParseDecimal(fmt.Sprintf("%.10f", targetValue/sourceValue))
 	if err != nil {
 		return money.ExchangeRate{}, fmt.Errorf("unable to parse exchange rate from %s to %s: %w", source, target, err)
 	}
 	return money.ExchangeRate(rate), nil
+}
+
+func readRateFromResponse(source, target string, respBody io.Reader) (money.ExchangeRate, error) {
+	decoder := xml.NewDecoder(respBody)
+	var response envelope
+	err := decoder.Decode(&response)
+	if err != nil {
+		return money.ExchangeRate{}, fmt.Errorf("%w: %s", ErrUnexpectedFormat, err)
+	}
+	rate, err := response.exchangeRate(source, target)
+	if err != nil {
+		return money.ExchangeRate{}, fmt.Errorf("%w: %s", ErrChangeRateNotFound, err)
+	}
+	return rate, nil
 }
 
 func (c Client) FetchExchangeRate(source, target money.Currency) (money.ExchangeRate, error) {
@@ -76,8 +94,15 @@ func (c Client) FetchExchangeRate(source, target money.Currency) (money.Exchange
 			ErrServerSide, err.Error())
 	}
 	defer resp.Body.Close()
+	if err = checkStatusCode(resp.StatusCode); err != nil {
+		return money.ExchangeRate{}, err
+	}
+	rate, err := readRateFromResponse(source.Code(), target.Code(), resp.Body)
+	if err != nil {
+		return money.ExchangeRate{}, err
+	}
 
-	return money.ExchangeRate{}, nil
+	return rate, nil
 }
 
 func checkStatusCode(statusCode int) error {
